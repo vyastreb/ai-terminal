@@ -28,6 +28,7 @@ YELLOW = '\033[93m'
 BLUE = '\033[94m'
 ANSWER_COLOR = BLUE
 CODE_COLOR = RED
+EMOJI = True
 
 model = "mistral-tiny"
 T0 = 0.2
@@ -57,8 +58,13 @@ def print_in_box(text, color_code):
     lines = text.split('\n')
     # Calculate max length considering the visible characters only
     max_length = max(len(strip_ansi_codes(line)) for line in lines)
-    header = " AI REPLY "
-    upper_border = '+' + '--' + header + "-" * (max_length - len(header) - 2) + '--' + '+'
+
+    if EMOJI:
+        header = " < 🤖 > "
+        upper_border = '+' + '--' + header + "-" * (max_length - len(header) - 3) + '--' + '+'
+    else:
+        header = " AI REPLY "
+        upper_border = '+' + '--' + header + "-" * (max_length - len(header) - 2) + '--' + '+'
     lower_border = '+' + '-' * (max_length + 2) + '+'
 
     bold_pattern = re.compile(r'\*\*(.*?)\*\*')
