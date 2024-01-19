@@ -1,8 +1,9 @@
 
 January 19, 2024
 
-1. Script does not handle \#, \' and probably \" in the text of the question,  solve it.
-1. Syntaxis with `xxx` does not work well, see example:
+1. Add possibility to make a dialog by keeping recent messages in the memory.
+2. Script does not handle \#, \' and probably \" in the text of the question,  solve it.
+3. Syntaxis with `xxx` does not work well, see example:
 
 +-- < 🤖 > -----------------------------------------------------------------------+
 | Yes, you can set up your environment to use Python 3.10 as your default version |
