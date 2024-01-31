@@ -20,15 +20,16 @@ The configuration file `.mistralai/config.json` is used to store the parameters.
 
 from mistralai.client import MistralClient
 from mistralai.models.chat_completion import ChatMessage
-import os, sys, re, time, json
+import os, sys, re, time, json, contextlib, readline
 from collections import deque
 
 ########################################
 #     Global parameters
 ########################################
 
-CONFIG_PATH  = os.path.expanduser("~/.mistralai/config.json")
-HISTORY_PATH = os.path.expanduser("~/.mistralai/history.txt")
+CONFIG_PATH     = os.path.expanduser("~/.mistralai/config.json")
+HISTORY_PATH    = os.path.expanduser("~/.mistralai/history.txt")
+QUESTIONS_PATH  = os.path.expanduser("~/.mistralai/questions.txt")
 
 # ANSI color codes
 RED = '\033[91m'
@@ -63,6 +64,13 @@ client = MistralClient(api_key=api_key)
 #     Functions
 ########################################
 
+def load_history():
+    if os.path.exists(QUESTIONS_PATH):
+        readline.read_history_file(QUESTIONS_PATH)
+
+def save_history():
+    readline.write_history_file(QUESTIONS_PATH)
+
 def Role(i, size):
         if i % 2 == 0:
             return "user"
@@ -75,7 +83,7 @@ def follow_chat(chat_history : deque, temperature=T0, max_tokens=TokenMax):
     else:
         messages = []
         for i in range(len(chat_history)):
-            messages.append(ChatMessage(role=Role(i,len(chat_history)), content=chat_history[i],temperature=temperature, max_tokens=max_tokens))
+            messages.append(ChatMessage(role=Role(i,len(chat_history)), content=chat_history[i]))
         # print("\n\n == MESSAGES == \n\n", messages )
         try:
             chat_response = client.chat(
@@ -92,7 +100,7 @@ def follow_chat(chat_history : deque, temperature=T0, max_tokens=TokenMax):
 
 def answer_question(my_question,temperature=T0, max_tokens=TokenMax):
         messages = [
-            ChatMessage(role="user", content=my_question,temperature=temperature, max_tokens=max_tokens),
+            ChatMessage(role="user", content=my_question),
         ]
         chat_response = client.chat(
             model=model,
@@ -252,11 +260,15 @@ def main():
             Chat = False
         else:
             if i == 0:
-                continue
-            if sys.argv[i] == ":":
-                # Concatenate everything after ":" into a single string.
-                my_question = " ".join(sys.argv[i+1:])
-                break
+                continue                
+            # if sys.argv[i] == ":":
+            #     # Concatenate everything after ":" into a single string.
+            #     my_question = " ".join(sys.argv[i+1:])
+            #     break
+
+    load_history()
+    my_question = input("> ")
+    save_history()
 
     if verbose:
         if ArgumentsProvenance == "Default values":
@@ -288,6 +300,8 @@ def main():
                     chat_history = deque([my_question], maxlen=max_memory)
                     with open(HISTORY_PATH, 'w') as f:
                         f.write(my_question)
+                    with open(QUESTIONS_PATH, 'w') as f:
+                        f.write(my_question)
             else:
                 chat_history = deque([my_question], maxlen=max_memory)
                 with open(HISTORY_PATH, 'w') as f:
@@ -303,15 +317,23 @@ def main():
                 message = chat_history[i].replace('\n\n',' ').replace('\n',' ').replace('\r',' ').replace('\t',' ')
                 print("Previous messages #{}: <{}>".format(i,message))
 
-    if Chat:
-        answer = follow_chat(chat_history,temperature=T0, max_tokens=TokenMax)
-    else:
-        answer = answer_question(my_question,temperature=T0, max_tokens=TokenMax)   
+    try:
+        if Chat:
+            answer = follow_chat(chat_history,temperature=T0, max_tokens=TokenMax)
+        else:
+            answer = answer_question(my_question,temperature=T0, max_tokens=TokenMax)   
+    except Exception as e:
+        print("An error occurred:", e)
+        answer = "ERROR: An error occurred, please try again"
     if Chat:
         chat_history.append(answer)
         with open(os.path.expanduser("~/.mistralai/history.txt"), 'w') as f:
             f.write('\n$$##\n'.join(chat_history))
     adjusted_text = split_long_lines_preserving_breaks(answer,max_line_length)
     print_in_box(colorize_text(adjusted_text), ANSWER_COLOR)
+
+
 if __name__ == "__main__":
-    main()
+    with contextlib.suppress(TypeError):
+        main()
+
