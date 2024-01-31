@@ -86,7 +86,7 @@ ai --temp 0.0
 
 ```bash
 ai --model mistral-tiny --temp 0.8 --tokens 5000
-> What is best (according to parisian) cheese in France?
+> What is the best (according to parisian) cheese in France?
 ```
 
 ### Features

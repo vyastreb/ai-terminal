@@ -2,6 +2,7 @@
 January 31, 2024
 
 [x] Handles proper input with tracking of history of questions.
+[ ] Handle unit tests.
 
 January 30, 2024
 

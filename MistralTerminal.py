@@ -1,9 +1,12 @@
 """
 MistralTerminal.py
 This script is a terminal interface for MistralAI.
-It is a simple script that allows you to ask questions to MistralAI directly in terminal and get (relatively) short answers.
-V.A. Yastrebov, CNRS, MINES Paris - PSL, France, Jan 2024.
+This script allows to interact with MistralAI's chatbot directly in the terminal and get well formated answers.
+
+Author: Vladislav A. Yastrebov 
+Affiliation: CNRS, MINES Paris - PSL, France, Jan 2024.
 License: BSD 3 clause
+Repository: https://github.com/vyastreb/ai-terminal
 
 Handle arguments:
 --help/-h:                writes help
@@ -12,6 +15,7 @@ Handle arguments:
 --model/-m:               sets the model
 --verbose/-v:             prints the question
 --not-chat/-n:            switchs off chat mode, does not keep previous answers
+--unit-test/-u:           unit tests
 
 It stores the history of previous answers in a file in home directory `.mistralai/history.txt`
 The configuration file `.mistralai/config.json` is used to store the parameters.
@@ -258,12 +262,7 @@ def main():
         elif sys.argv[i] == "--not-chat" or sys.argv[i] == "-n":
             Chat = False
         else:
-            if i == 0:
-                continue                
-            # if sys.argv[i] == ":":
-            #     # Concatenate everything after ":" into a single string.
-            #     my_question = " ".join(sys.argv[i+1:])
-            #     break
+            continue                
 
     load_history()
     my_question = input("> ")
@@ -335,4 +334,3 @@ def main():
 if __name__ == "__main__":
     with contextlib.suppress(TypeError):
         main()
-
