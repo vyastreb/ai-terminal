@@ -1,8 +1,9 @@
 
 January 19, 2024
 
-1. Add possibility to make a dialog by keeping recent messages in the memory.
-2. Script does not handle \#, \' and probably \" in the text of the question,  solve it.
+[x] Add possibility to make a dialog by keeping recent messages in the memory. *Done on Jan 30, 2024.*
+[-] Script does not handle \#, \' and probably \" in the text of the question,  solve it. *That's not easy to handle simply in terminal...*
+
 3. Syntaxis with `xxx` does not work well, see example:
 
 +-- < 🤖 > -----------------------------------------------------------------------+

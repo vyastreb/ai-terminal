@@ -8,16 +8,16 @@ License: BSD 3 clause
 
 from mistralai.client import MistralClient
 from mistralai.models.chat_completion import ChatMessage
-import os
-import sys
-import re
+import os, sys, re, time
+from collections import deque
 
 # Handle arguments
 # --help/-h:                writes help
 # --temp/-T:                sets temperature
 # --tokens/-t:              sets number of tokens
 # --model/-m:               sets the model
-# --verbatim/-v:            prints the question verbatim
+# --verbose/-v:             prints the question
+# --not-chat/-n:            switchs off chat mode, does not keep previous answers
 # : Text of the question:   after ":" the question goes
 
 # Default values
@@ -31,21 +31,49 @@ CODE_COLOR = RED
 EMOJI = True
 
 model = "mistral-tiny"
+max_depth = 31 # Maximum number of previous answers to keep in memory in chat mode, should be odd
 T0 = 0.2
-TokenMax = 2
+TokenMax = 1
+waitingTime = 180 # Time in seconds after which the history is erased
 PrintQuestion = False
 max_length = 80
+Chat = True
+
+def Role(i, size):
+        if i % 2 == 0:
+            return "user"
+        else:
+            return "assistant"
+
+def follow_chat(previous_answers : deque,temperature=T0, max_tokens=TokenMax):
+    if len(previous_answers) == 1:
+        return answer_question(previous_answers[0],temperature=temperature, max_tokens=max_tokens)
+    else:
+        messages = []
+        for i in range(len(previous_answers)):
+            messages.append(ChatMessage(role=Role(i,len(previous_answers)), content=previous_answers[i],temperature=temperature, max_tokens=max_tokens))
+        # print("\n\n == MESSAGES == \n\n", messages )
+        try:
+            chat_response = client.chat(
+                model=model,
+                messages=messages,
+            )
+            bot_response = chat_response.choices[0].message.content
+        except Exception as e:
+            print("An error occurred:", e)
+            bot_response = "ERROR: An error occurred, please try again"
+        return bot_response
 
 def answer_question(my_question,temperature=T0, max_tokens=TokenMax):
-    messages = [
-        ChatMessage(role="user", content=my_question,temperature=temperature, max_tokens=max_tokens),
-    ]
-    chat_response = client.chat(
-        model=model,
-        messages=messages,
-    )
-    bot_response = chat_response.choices[0].message.content
-    return bot_response
+        messages = [
+            ChatMessage(role="user", content=my_question,temperature=temperature, max_tokens=max_tokens),
+        ]
+        chat_response = client.chat(
+            model=model,
+            messages=messages,
+        )
+        bot_response = chat_response.choices[0].message.content
+        return bot_response
 
 def strip_ansi_codes(text):
     # Regular expression to match ANSI escape codes
@@ -135,36 +163,65 @@ def colorize_text(text):
 
     return colored_text
 
-
 # Parse arguments
 for i in range(len(sys.argv)):
     if sys.argv[i] == "--help" or sys.argv[i] == "-h":
         print("Usage: python3 MistralTerminal.py\n \
-            --model/-m:  sets the model\n \
-            --temp/-T:   sets temperature\n \
-            --tokens/-t: sets number of tokens\n \
-            --help/-h:   writes help")
+            --model/-m:     sets the model\n \
+            --temp/-T:      sets temperature\n \
+            --tokens/-t:    sets number of tokens\n \
+            --not-chat/-n:  switchs off chat mode, does not keep previous answers\n \
+            --help/-h:      writes help")
         print("Example: python3 MistralTerminal.py --model mistral-tiny --temp 0.2 --tokens 5")
         print("Default values:\n   model=mistral-tiny\n   temperature=0.2\n   number_of_tokens=2")
         exit()
     elif sys.argv[i] == "--model" or sys.argv[i] == "-m":
         model = sys.argv[i+1]
-    elif sys.argv[i] == "--verbatim" or sys.argv[i] == "-v":
+    elif sys.argv[i] == "--verbose" or sys.argv[i] == "-v":
         PrintQuestion = True
     elif sys.argv[i] == "--temp" or sys.argv[i] == "-T":
         T0 = float(sys.argv[i+1])
     elif sys.argv[i] == "--tokens" or sys.argv[i] == "-t":
         TokenMax = int(sys.argv[i+1])        
+    elif sys.argv[i] == "--not-chat" or sys.argv[i] == "-n":
+        Chat = False
     else:
         if i == 0:
             continue
         if sys.argv[i] == ":":
-            # Concatenate everything after ":" into a single string including all types of quotes, primes, etc.
+            # Concatenate everything after ":" into a single string.
             my_question = " ".join(sys.argv[i+1:])
             break
 
+# Previous answers are kept in ~.mistralai/history.txt, check that it exists, and if it exists and not older than 1 minute, read it, otherwise erase it and create a new one
+
+if Chat:
+    history_file_path = os.path.expanduser("~/.mistralai/history.txt")
+
+    try:
+        if os.path.isfile(history_file_path):
+            if os.path.getmtime(history_file_path) > time.time() - waitingTime:
+                with open(history_file_path, 'r') as f:
+                    previous_answers = deque(f.read().split('$$##'), maxlen=max_depth)
+                with open(history_file_path, 'a') as f:
+                    f.write('$$##' + my_question)
+                previous_answers.append(my_question)
+            else:
+                previous_answers = deque([my_question], maxlen=max_depth)
+                with open(history_file_path, 'w') as f:
+                    f.write(my_question)
+        else:
+            previous_answers = deque([my_question], maxlen=max_depth)
+            with open(history_file_path, 'w') as f:
+                f.write(my_question)
+    except Exception as e:
+        print("An error occurred:", e)
+
+
 if PrintQuestion:
     print("<"+my_question+">")
+    if Chat:
+        print("Previous answers:",previous_answers)
 
 
 # Retrieve API key
@@ -173,6 +230,13 @@ api_key = os.environ["MISTRAL_API_KEY"]
 # Request to MistralAI
 client = MistralClient(api_key=api_key)
 
-answer = answer_question(my_question)
+if Chat:
+    answer = follow_chat(previous_answers,temperature=T0, max_tokens=TokenMax)
+else:
+    answer = answer_question(my_question,temperature=T0, max_tokens=TokenMax)   
+if Chat:
+    previous_answers.append(answer)
+    with open(os.path.expanduser("~/.mistralai/history.txt"), 'w') as f:
+        f.write('\n$$##\n'.join(previous_answers))
 adjusted_text = split_long_lines_preserving_breaks(answer,max_length)
 print_in_box(colorize_text(adjusted_text), ANSWER_COLOR)

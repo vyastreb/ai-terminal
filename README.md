@@ -1,7 +1,7 @@
 # MistralTerminal - chatbot in your Linux terminal
 
 ## Overview
-MistralTerminal is a command-line interface for interacting with MistralAI. It allows users to send questions directly from the terminal and receive concise answers from MistralAI. This script is designed for simplicity and ease of use.
+MistralTerminal is a command-line interface for interacting with MistralAI. It allows users to send questions directly from the terminal and receive concise answers from MistralAI. This script is designed for simplicity and ease of use. It keeps the conversation in a local file, so you can continue interact with it without giving the context every time. It also supports colored output for enhanced readability.
 
 ## Author
 V.A. Yastrebov, CNRS, MINES Paris - PSL, France, Jan 2024.
@@ -29,10 +29,11 @@ alias ai="python3 /path/to/script/MistralTerminal.py 2>/dev/null "
 - `--model/-m`: Sets the MistralAI model to be used. Default is 'mistral-tiny'.
 - `--temp/-T`: Sets the temperature for the AI's responses. Default is 0.2.
 - `--tokens/-t`: Sets the maximum number of tokens in the response. Default is 2.
-- `--verbatim/-v`: If set, prints the question verbatim.
+- `--verbose/-v`: If set, prints the question or the whole history.
+- `--no-chat/-n`: If set, does not keep the discussion in memory.
 - `--help/-h`: Displays the help message and usage instructions.
 
-The default model is 'mistral-tiny', which is a smaller model that is faster to load and run. The default temperature is 0.2, which is a good value for most questions. The default token count is 2, which is a good value for most questions. The verbatim option is useful for checking whether your question was correctly parsed by the script. For example, if you have `#` in your question, you need to put it with `\#`.
+The default model is 'mistral-tiny', which is a smaller model that is faster to load and run. The default temperature is 0.2, which is a good value for most questions. The default token count is 2, which is a good value for most questions. The verbose option is useful for checking whether your question was correctly parsed by the script. For example, if you have `#` or `"` in your question, you need to put it with `\#`, `\"`, the same with brackets.
 
 ## Usage
 The script can be run from the command line with various options. Enter your question preceded by `:` and the script will process and display the AI's response.
@@ -56,12 +57,15 @@ ai --model mistral-tiny --temp 0.2 --tokens 5 : What is best cheese in France?
 ```
 
 ## Features
+
+- Can be run from anywhere in the terminal
+- Keeps the history of conversation in a local file for some time
 - Colored output for enhanced readability
 - Adjustable parameters for model, temperature, and token count
 - Supports multiline responses with automatic line wrapping
 
 ## Notes
-- Ensure your terminal supports ANSI color codes for the best experience.
-- The script dynamically adjusts the line length to fit the terminal window.
 
+- Ensure your terminal supports ANSI color codes for the best experience.
+- The history of last messages (30 by default) is stored in `~/.mistralai/history.txt` for 3 minutes by default. You can change the number of messages and the time in the script: `max_depth` and `waitingTime`.
 
