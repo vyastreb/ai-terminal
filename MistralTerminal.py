@@ -12,7 +12,6 @@ Handle arguments:
 --model/-m:               sets the model
 --verbose/-v:             prints the question
 --not-chat/-n:            switchs off chat mode, does not keep previous answers
-       :                  text of the question - after ":" the question goes
 
 It stores the history of previous answers in a file in home directory `.mistralai/history.txt`
 The configuration file `.mistralai/config.json` is used to store the parameters.
@@ -54,7 +53,7 @@ model       = "mistral-tiny"
 try:
     api_key = os.environ["MISTRAL_API_KEY"]
 except KeyError:
-    print("Error: MISTRAL_API_KEY environment variable is not set.")
+    print("Error: MISTRAL_API_KEY environment variable is not set.\nObtain you API key from https://mistral.ai")
     exit()
 
 # create MistralAI client

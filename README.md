@@ -25,9 +25,8 @@ export MISTRAL_API_KEY='your_api_key_here'
 You can also set-up an alias `ai` to run the script from anywhere in your terminal (for `bash` add in your `.bashrc`):
 
 ```bash
-alias ai="python3 /path/to/script/MistralTerminal.py 2>/dev/null "
+alias ai="python3 /path/to/script/MistralTerminal.py"
 ```
-
 
 ### Options
 
@@ -36,9 +35,10 @@ alias ai="python3 /path/to/script/MistralTerminal.py 2>/dev/null "
 - `--tokens/-t`: Sets the maximum number of tokens in the response. Default is 2.
 - `--verbose/-v`: If set, prints the question or the whole history.
 - `--no-chat/-n`: If set, does not keep the discussion in memory.
+- `--unit-test/-u`: Unit tests.
 - `--help/-h`: Displays the help message and usage instructions.
 
-The default model is 'mistral-tiny', which is a smaller model that is faster to load and run. The default temperature is 0.2, which is a good value for most questions. The default token count is 2, which is a good value for most questions. The verbose option is useful for checking whether your question was correctly parsed by the script. For example, if you have `#` or `"` in your question, you need to put it with `\#`, `\"`, the same with brackets.
+The default model is 'mistral-tiny', which is a smaller model that is faster to load and run. The default temperature is 0.5, which is a good value for most questions. The default token count is 350, which is a reasonable length for most answers. The verbose option is useful for checking whether your questions and history were correctly parsed by the script. 
 
 ### Configuration file
 
@@ -64,27 +64,36 @@ But if you prescribe options in the command line, they will be used instead of t
 The script can be run from the command line with various options. Enter your question preceded by `:` and the script will process and display the AI's response.
 
 ```bash
-python3 MistralTerminal.py [options] : your question
+python3 MistralTerminal.py [options]
 ```
 or if you set-up an alias:
 ```bash
-ai [options] : your question
+ai [options]
 ```
-Examples:
+These commands will start a new line `>  ` where your question could be written.
+
+**Examples:**
+
 ```bash
-ai : How to convert jpg to png in linux?
+ai
+> How to convert jpg to png in linux?
 ```
+
 ```bash
-ai --temp 0.5 : What is the meaning of life?
+ai --temp 0.0
+> What is the meaning of life?
 ```
+
 ```bash
-ai --model mistral-tiny --temp 0.2 --tokens 5 : What is best cheese in France?
+ai --model mistral-tiny --temp 0.8 --tokens 5000
+> What is best (according to parisian) cheese in France?
 ```
 
 ### Features
 
 - Can be run from anywhere in the terminal
-- Keeps the history of conversation in a local file for some time
+- Keeps the history of conversation in a local file for some (user defined) time
+- Keeps past questions for some (user defined) time
 - Colored output for enhanced readability
 - Adjustable parameters for model, temperature, and token count
 - Supports multi-line responses with automatic line wrapping
@@ -93,4 +102,3 @@ ai --model mistral-tiny --temp 0.2 --tokens 5 : What is best cheese in France?
 
 - Ensure your terminal supports ANSI color codes for the best experience.
 - The history of last messages (31 by default) is stored in `~/.mistralai/history.txt` for 3 minutes by default. You can change the number of stored messages and the time in the script of in config file: `max_memory` and `waitingTime`.
-
