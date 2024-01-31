@@ -123,12 +123,12 @@ def print_in_box(text, color_code):
         upper_border = '+' + '--' + header + "-" * (max_line_length - len(header) - 2) + '--' + '+'
     lower_border = '+' + '-' * (max_line_length + 2) + '+'
 
-    bold_pattern = re.compile(r'\*\*(.*?)\*\*')
-    italic_pattern = re.compile(r'\*(.*?)\*')
+    # bold_pattern = re.compile(r'\*\*(.*?)\*\*')
+    # italic_pattern = re.compile(r'\*(.*?)\*')
 
     print(color_code + upper_border)
     for line in lines:
-        print('| ' + line + ' ' * (max_line_length - len(strip_ansi_codes(line))) + ' |')
+        print('  ' + line + ' ' * (max_line_length - len(strip_ansi_codes(line))) + '  ')
     print(lower_border + '\033[0m')  # Reset to default color at the end
 
 def split_long_lines(input_string, max_line_length):
@@ -204,7 +204,6 @@ def main():
     waitingTime = 180 # Time in seconds after which the history is erased
     max_line_length = 80      
 
-    time0 = time.time()
     # Checks whether config file exists: if yes, read parameters from there, otherwise use default values
     ArgumentsProvenance = "Default values"
     if os.path.isfile(CONFIG_PATH):
@@ -304,8 +303,6 @@ def main():
                 message = chat_history[i].replace('\n\n',' ').replace('\n',' ').replace('\r',' ').replace('\t',' ')
                 print("Previous messages #{}: <{}>".format(i,message))
 
-    print("Time it takes to formulate the question and grab the history: {:.2f} s".format(time.time()-time0))
-    time0 = time.time()
     if Chat:
         answer = follow_chat(chat_history,temperature=T0, max_tokens=TokenMax)
     else:
@@ -316,6 +313,5 @@ def main():
             f.write('\n$$##\n'.join(chat_history))
     adjusted_text = split_long_lines_preserving_breaks(answer,max_line_length)
     print_in_box(colorize_text(adjusted_text), ANSWER_COLOR)
-    print("Time it takes to get the answer: {:.2f} s".format(time.time()-time0))
 if __name__ == "__main__":
     main()
