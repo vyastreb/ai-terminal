@@ -30,7 +30,7 @@ alias ai="python3 /path/to/script/MistralTerminal.py"
 
 ### Options
 
-- `--model/-m`: Sets the MistralAI model to be used. Default is 'mistral-tiny'.
+- `--model/-m`: Sets the MistralAI model to be used (mistral-tiny, mistral-small or mistral-medium). Default is 'mistral-tiny'.
 - `--temp/-T`: Sets the temperature for the AI's responses. Default is 0.2.
 - `--tokens/-t`: Sets the maximum number of tokens in the response. Default is 2.
 - `--verbose/-v`: If set, prints the question or the whole history.
@@ -87,6 +87,11 @@ ai --temp 0.0
 ```bash
 ai --model mistral-tiny --temp 0.8 --tokens 5000
 > What is the best (according to parisian) cheese in France?
+```
+
+```bash
+ai -m mistral-small -T 0.8 -t 500 -v
+> What is the visible EM spectrum?
 ```
 
 ### Features

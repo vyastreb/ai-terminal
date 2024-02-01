@@ -1,19 +1,24 @@
 
+# TODO
+
++ [ ] Make code in \`xxx\` and code in blocks \`\`\`xxx\`\`\` selectable.
+
+# Done
+
 January 31, 2024
 
-[x] Handles proper input with tracking of history of questions.
-[ ] Handle unit tests.
++ [x] Handles proper input with tracking of history of questions.
 
 January 30, 2024
 
-[x] Keeps dialog history.
++ [x] Keeps dialog history.
 
 January 19, 2024
 
-[x] Add possibility to make a dialog by keeping recent messages in the memory. *Fixed on Jan 30, 2024.*
-[x] Script does not handle \#, \' and probably \" in the text of the question,  solve it. *FIXED on Jan 31, 2024"
++ [x] Add possibility to make a dialog by keeping recent messages in the memory. *Fixed on Jan 30, 2024.*
++ [x] Script does not handle \#, \' and probably \" in the text of the question,  solve it. *FIXED on Jan 31, 2024"
 
-3. Syntaxis with `xxx` does not work well, see example:
+3. Syntaxis with \`xxx\` does not work well, see example:
 
 +-- < 🤖 > -----------------------------------------------------------------------+
 | Yes, you can set up your environment to use Python 3.10 as your default version |

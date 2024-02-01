@@ -240,13 +240,14 @@ def main():
     for i in range(len(sys.argv)):
         if sys.argv[i] == "--help" or sys.argv[i] == "-h":
             print("Usage: python3 MistralTerminal.py\n \
-                --model/-m:     sets the model\n \
-                --temp/-T:      sets temperature\n \
-                --tokens/-t:    sets number of tokens\n \
+                --model/-m:     sets the model (mistral-tiny, mistral-small or mistral-medium)\n \
+                --temp/-T:      sets temperature (0.0 <= T <= 1.0)\n \
+                --tokens/-t:    sets number of tokens (integer, 1 sentence ~ 50)\n \
+                --verbose/-v:   verbose output\n \
                 --not-chat/-n:  switchs off chat mode, does not keep previous answers\n \
                 --help/-h:      writes help")
             print("Example: python3 MistralTerminal.py --model mistral-tiny --temp 0.2 --tokens 50")
-            print("Default values:\n   model={}\n   temperature={}\n   number_of_tokens={}".format(model,T0,TokenMax))
+            print("To know current values, execute with --verbose")
             exit()
         elif sys.argv[i] == "--model" or sys.argv[i] == "-m":
             ArgumentsProvenance = "Command line"
