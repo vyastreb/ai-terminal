@@ -1,13 +1,17 @@
 
 # TODO
 
-+ [ ] As soon as the past history is implemented, the last question is not saved in "questions.txt" file. It should be saved.
+[ ] Check **\#FIXME** about bold and italic text so that it is properly handled in code blocks.
+[ ] If the number of requested tokens is too short, and the answer is cut, we can internally handle it to ask to continue. For example, we can check that the answer does not end with a full stop... but it is not a general receipt, it can stop at \`\`\` without full stop.
 
 # Done
 
 February 2, 2024
 
-[x] Code blocks \`\`\`xxx\`\`\` are selectable to be copied to the clipboard.
++ [x] Code blocks \`\`\`xxx\`\`\` are selectable to be copied to the clipboard.
++ [x] As soon as the past history is implemented, the last question is not saved in "questions.txt" file. It should be saved.
++ [x] Make it handle multiline input.
++ [x] Handle better history of the chat: separate questions and answers using prompt_toolkit.
 
 January 31, 2024
 

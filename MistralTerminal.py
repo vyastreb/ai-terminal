@@ -23,10 +23,13 @@ The configuration file `.mistralai/config.json` is used to store the parameters.
 
 from mistralai.client import MistralClient
 from mistralai.models.chat_completion import ChatMessage
-import os, sys, re, time, json, contextlib, readline, subprocess
+import os, sys, re, time, json, contextlib, readline, subprocess, threading, itertools
 from collections import deque
+# Package for handling chat interface with history, multi-line input and prompting
 from prompt_toolkit import PromptSession
 from prompt_toolkit.key_binding import KeyBindings
+from prompt_toolkit.history import FileHistory
+from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 
 ########################################
 #     Global parameters
@@ -42,9 +45,11 @@ RED = '\033[91m'
 GREEN = '\033[92m'
 YELLOW = '\033[93m'
 BLUE = '\033[94m'
+WHITE_ON_BLACK='\033[40m\033[37m'
+
 # Answers (code blocks) will be printed in ANSWER_COLOR (CODE_COLOR), choose the one which is visible on your terminal in both light and dark mode
-ANSWER_COLOR = BLUE
-CODE_COLOR = RED
+ANSWER_COLOR = WHITE_ON_BLACK #BLUE
+CODE_COLOR = BLUE #RED
 # Activate emoji support
 EMOJI = True
 # Default MistralAI parameters: temperature T0, maximal number of used tokens TokenMax, and model
@@ -143,7 +148,7 @@ def print_in_box(text, color_code):
 
     print(color_code + upper_border)
     for line in lines:
-        print('  ' + line + ' ' * (max_line_length - len(strip_ansi_codes(line))) + '  ')
+        print('| ' + line + ' ' * (max_line_length - len(strip_ansi_codes(line))) + ' |')
     print(lower_border + '\033[0m')  # Reset to default color at the end
 
 def split_long_lines(input_string, max_line_length):
@@ -165,7 +170,7 @@ def split_long_lines(input_string, max_line_length):
     return new_string
 
 def replace_code_tag(line):
-    TAGS = ["bash","python","yaml","json","html","css","javascript","typescript","c","cpp","java","kotlin","scala","swift","php","ruby","perl","shell","powershell","sql","r","matlab","latex","markdown"]
+    TAGS = ["","bash","python","yaml","json","html","css","javascript","typescript","c","cpp","java","kotlin","scala","swift","php","ruby","perl","shell","powershell","sql","r","matlab","latex","markdown"]
     changed = False
     for tag in TAGS:
         if tag in line:
@@ -224,10 +229,12 @@ def colorize_text(text):
     # Define ANSI background color codes
     RESET = ANSWER_COLOR  # Reset to default
 
-    bold_pattern = re.compile(r'\*\*(.*?)\*\*')
-    italic_pattern = re.compile(r'\*(.*?)\*')
-    colored_text = bold_pattern.sub(lambda m: '\033[1m' + m.group(1) + '\033[0m' + RESET, text)  # Make **bold**
-    colored_text = italic_pattern.sub(lambda m: '\033[3m' + m.group(1) + '\033[0m' + RESET, colored_text)  # Make *italic*
+    # FIXME, does not work within code blocks
+    # bold_pattern = re.compile(r'\*\*(.*?)\*\*')
+    # italic_pattern = re.compile(r'\*(.*?)\*')
+    # colored_text = bold_pattern.sub(lambda m: '\033[1m' + m.group(1) + '\033[0m' + RESET, text)  # Make **bold**
+    # colored_text = italic_pattern.sub(lambda m: '\033[3m' + m.group(1) + '\033[0m' + RESET, colored_text)  # Make *italic*
+    colored_text = text
 
     # Regex patterns for single and triple backticks
     pattern_inline = re.compile(r'`(.*?)`')  # Single backtick
@@ -238,6 +245,18 @@ def colorize_text(text):
     colored_text = pattern_inline.sub(lambda m: CODE_COLOR + m.group(1) + RESET, colored_text)
 
     return colored_text
+
+# Simple animated loading function
+def thinking_animation(event):
+    # for frame in itertools.cycle(['-', '\\', '|', '/']):
+    for frame in itertools.cycle(['🤖', '⏳', '💡', '🕓']):
+        if event.is_set():
+            break
+        sys.stdout.write('\rThinking ' + frame)
+        sys.stdout.flush()
+        time.sleep(0.3)
+    sys.stdout.write('\r' + ' ' * len('Thinking -') + '\r')
+    sys.stdout.flush()
 
 ########################################
 # Functions for copying to clipboard
@@ -316,10 +335,26 @@ def main():
         else:
             continue                
 
-    load_history()
-    my_question = input("> ")
-    save_history()
+# New way to get question: use prompt_toolkit
 
+    session = PromptSession(history=FileHistory(QUESTIONS_PATH), auto_suggest=AutoSuggestFromHistory())
+
+    bindings = KeyBindings()
+
+    @bindings.add('enter')
+    def _(event):
+        buffer = event.current_buffer
+        # Check the content of the current line to decide the action.
+        if buffer.document.current_line.strip():
+            # If the current line is not empty, insert a newline.
+            buffer.newline(copy_margin=True)
+        else:
+            # If the current line is empty (double Enter), finalize the input.
+            # Remove the last newline (as it is extra) before finalizing.
+            buffer.delete_before_cursor(count=1)
+            buffer.validate_and_handle()    
+    my_question = session.prompt('> ', key_bindings=bindings, multiline=True)
+    
     if verbose:
         if ArgumentsProvenance == "Default values":
             print("No configuration file found, using default parameters:")
@@ -340,16 +375,16 @@ def main():
     if Chat:
         try:
             if os.path.isfile(HISTORY_PATH):
-                if True: #os.path.getmtime(HISTORY_PATH) > time.time() - waitingTime:
+                if os.path.getmtime(HISTORY_PATH) > time.time() - waitingTime:
                     with open(HISTORY_PATH, 'r') as f:
                         chat_history = deque(f.read().split('$$##'), maxlen=max_memory)
                     with open(HISTORY_PATH, 'a') as f:
                         f.write('$$##' + my_question)
                     chat_history.append(my_question)
-                # else:
-                #     chat_history = deque([my_question], maxlen=max_memory)
-                #     with open(HISTORY_PATH, 'w') as f:
-                #         f.write(my_question)
+                else:
+                    chat_history = deque([my_question], maxlen=max_memory)
+                    with open(HISTORY_PATH, 'w') as f:
+                        f.write(my_question)
                 #     with open(QUESTIONS_PATH, 'w') as f:
                 #         f.write(my_question)
             else:
@@ -367,6 +402,10 @@ def main():
                 message = chat_history[i].replace('\n\n',' ').replace('\n',' ').replace('\r',' ').replace('\t',' ')
                 print("Previous messages #{}: <{}>".format(i,message))
 
+    stop_animation = threading.Event()
+    animation_thread = threading.Thread(target=thinking_animation, args=(stop_animation,))
+    animation_thread.start()
+
     try:
         if Chat:
             answer = follow_chat(chat_history,temperature=T0, max_tokens=TokenMax)
@@ -379,16 +418,19 @@ def main():
         chat_history.append(answer)
         with open(os.path.expanduser("~/.mistralai/history.txt"), 'w') as f:
             f.write('\n$$##\n'.join(chat_history))
+    
+    # Stopping the animation
+    stop_animation.set()
+    animation_thread.join()
 
-    # FIXME add code blocks here
     adjusted_text,code_blocks = split_long_lines_preserving_breaks(answer,max_line_length)
     print_in_box(colorize_text(adjusted_text), ANSWER_COLOR)
 
     # If there are code blocks, prompt the user to choose one to copy
-    if code_blocks:
+    if len(code_blocks) > 1:
         while True:  # Keep asking until the user inputs a valid option
             try:
-                block_selection = input(CODE_COLOR + ">>> Select [code block] to copy to the clipboard: " + "\033[0m")
+                block_selection = input(CODE_COLOR + "/ Select [code block] to copy to the clipboard: " + "\033[0m")
                 selection = int(block_selection)
                 if 1 <= selection <= len(code_blocks):
                     copy_to_clipboard(code_blocks[selection - 1])
@@ -398,6 +440,9 @@ def main():
                     break
             except ValueError: # Do nothing
                 break
+    elif len(code_blocks):
+        print(CODE_COLOR + "/ Code block [1] was copied to the clipboard. \033[0m")
+        copy_to_clipboard(code_blocks[0])
 
 if __name__ == "__main__":
     with contextlib.suppress(TypeError):

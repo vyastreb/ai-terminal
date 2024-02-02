@@ -2,7 +2,7 @@
 
 ## Overview
 
-MistralTerminal is a command-line interface for interacting with MistralAI. It allows users to send questions directly from the terminal and receive concise answers from MistralAI. This script is designed for simplicity and ease of use. It keeps the conversation in a local file, so you can continue interact with it without giving the context every time. It also supports colored output for enhanced readability.
+MistralTerminal is a command-line interface for interacting with MistralAI. It allows users to send questions directly from the terminal and receive concise answers from MistralAI. This script is designed for simplicity and ease of use. It keeps the conversation history, so you can continue interact with it without giving the context every time. The input can be multiline. If the script suggest code blocks, you can easily copy them in the clipboard. It also supports colored output for enhanced readability.
 
 ## Author
 
@@ -13,6 +13,7 @@ License: BSD 3 clause
 
 - Python 3
 - mistralai Python package `pip install mistralai`
+- prompt toolkit Python package ` prompt-toolkit`
 - An API key for MistralAI, check on [mistral.ai](https://mistral.ai)
 
 ## Installation
@@ -97,8 +98,11 @@ ai -m mistral-small -T 0.8 -t 500 -v
 ### Features
 
 - Can be run from anywhere in the terminal
+- Supports multi-line input
+- Remembers past questions
+- If one code block is shown, it automatically stores it in the clipboard
+- If several code blocks are shown, it suggests to store the one you want in the clipboard
 - Keeps the history of conversation in a local file for some (user defined) time
-- Keeps past questions for some (user defined) time
 - Colored output for enhanced readability
 - Adjustable parameters for model, temperature, and token count
 - Supports multi-line responses with automatic line wrapping
