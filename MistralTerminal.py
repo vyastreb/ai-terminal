@@ -25,6 +25,8 @@ from mistralai.client import MistralClient
 from mistralai.models.chat_completion import ChatMessage
 import os, sys, re, time, json, contextlib, readline, subprocess
 from collections import deque
+from prompt_toolkit import PromptSession
+from prompt_toolkit.key_binding import KeyBindings
 
 ########################################
 #     Global parameters
@@ -33,6 +35,7 @@ from collections import deque
 CONFIG_PATH     = os.path.expanduser("~/.mistralai/config.json")
 HISTORY_PATH    = os.path.expanduser("~/.mistralai/history.txt")
 QUESTIONS_PATH  = os.path.expanduser("~/.mistralai/questions.txt")
+QUESTION_HISTORY_LENGTH = 100
 
 # ANSI color codes
 RED = '\033[91m'
@@ -72,6 +75,7 @@ def load_history():
         readline.read_history_file(QUESTIONS_PATH)
 
 def save_history():
+    readline.set_history_length(QUESTION_HISTORY_LENGTH)
     readline.write_history_file(QUESTIONS_PATH)
 
 def Role(i, size):
