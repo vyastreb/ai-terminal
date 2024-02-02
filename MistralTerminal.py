@@ -23,7 +23,7 @@ The configuration file `.mistralai/config.json` is used to store the parameters.
 
 from mistralai.client import MistralClient
 from mistralai.models.chat_completion import ChatMessage
-import os, sys, re, time, json, contextlib, readline
+import os, sys, re, time, json, contextlib, readline, subprocess
 from collections import deque
 
 ########################################
@@ -160,13 +160,46 @@ def split_long_lines(input_string, max_line_length):
     new_string += current_line.rstrip()
     return new_string
 
+def replace_code_tag(line):
+    TAGS = ["bash","python","yaml","json","html","css","javascript","typescript","c","cpp","java","kotlin","scala","swift","php","ruby","perl","shell","powershell","sql","r","matlab","latex","markdown"]
+    changed = False
+    for tag in TAGS:
+        if tag in line:
+            line = line.replace(tag,"")
+            changed = True
+    return changed, line
+
 def split_long_lines_preserving_breaks(input_string, max_line_length):
     lines = input_string.split('\n')
     new_lines = []
+    code_blocks = []
+    block_id = 1
+    start_block = False
+    one_block = ""
 
     for line in lines:
-        words = line.split()
         current_line = ""
+        if start_block and "```" in line:
+            start_block = False
+        elif "```" in line and not start_block:
+            print("Start>> ",line   )
+            start_block = True
+            # find first occurence of "```" in line
+            i = line.find("```")
+            # print("in line <"+line+">, code block starts at ",i)
+            one_block = line.replace("```","")
+            replaced, one_block = replace_code_tag(one_block)
+            print("one_block: ",one_block)
+            if replaced:
+                line = line[:i] + "```[" + str(block_id) + "] "+line[i+3:]
+        if start_block and "```" not in line:
+            one_block += line + "\n"
+        if not start_block and one_block != "":
+            code_blocks.append(one_block)
+            one_block = ""
+            block_id += 1
+
+        words = line.split()
 
         for word in words:
             # Check if adding the next word exceeds the max line length
@@ -181,7 +214,7 @@ def split_long_lines_preserving_breaks(input_string, max_line_length):
         new_lines.append(current_line.rstrip())
 
     # Reconstruct the text with the original line breaks
-    return '\n'.join(new_lines)
+    return '\n'.join(new_lines), code_blocks
 
 def colorize_text(text):    
     # Define ANSI background color codes
@@ -201,6 +234,20 @@ def colorize_text(text):
     colored_text = pattern_inline.sub(lambda m: CODE_COLOR + m.group(1) + RESET, colored_text)
 
     return colored_text
+
+########################################
+# Functions for copying to clipboard
+########################################
+
+# Function to copy text to the clipboard
+def copy_to_clipboard(text):
+    try:
+        process = subprocess.Popen(['pbcopy'], stdin=subprocess.PIPE)
+        process.communicate(text.encode('utf-8'))
+    except FileNotFoundError:
+        # pbcopy might not be available on Linux, trying xclip instead
+        process = subprocess.Popen(['xclip', '-selection', 'c'], stdin=subprocess.PIPE)
+        process.communicate(input=text.encode('utf-8'))
 
 ########################################
 #     Main
@@ -289,18 +336,18 @@ def main():
     if Chat:
         try:
             if os.path.isfile(HISTORY_PATH):
-                if os.path.getmtime(HISTORY_PATH) > time.time() - waitingTime:
+                if True: #os.path.getmtime(HISTORY_PATH) > time.time() - waitingTime:
                     with open(HISTORY_PATH, 'r') as f:
                         chat_history = deque(f.read().split('$$##'), maxlen=max_memory)
                     with open(HISTORY_PATH, 'a') as f:
                         f.write('$$##' + my_question)
                     chat_history.append(my_question)
-                else:
-                    chat_history = deque([my_question], maxlen=max_memory)
-                    with open(HISTORY_PATH, 'w') as f:
-                        f.write(my_question)
-                    with open(QUESTIONS_PATH, 'w') as f:
-                        f.write(my_question)
+                # else:
+                #     chat_history = deque([my_question], maxlen=max_memory)
+                #     with open(HISTORY_PATH, 'w') as f:
+                #         f.write(my_question)
+                #     with open(QUESTIONS_PATH, 'w') as f:
+                #         f.write(my_question)
             else:
                 chat_history = deque([my_question], maxlen=max_memory)
                 with open(HISTORY_PATH, 'w') as f:
@@ -328,10 +375,27 @@ def main():
         chat_history.append(answer)
         with open(os.path.expanduser("~/.mistralai/history.txt"), 'w') as f:
             f.write('\n$$##\n'.join(chat_history))
-    adjusted_text = split_long_lines_preserving_breaks(answer,max_line_length)
+
+    # FIXME add code blocks here
+    adjusted_text,code_blocks = split_long_lines_preserving_breaks(answer,max_line_length)
     print_in_box(colorize_text(adjusted_text), ANSWER_COLOR)
 
+    # If there are code blocks, prompt the user to choose one to copy
+    if code_blocks:
+        while True:  # Keep asking until the user inputs a valid option
+            try:
+                block_selection = input(CODE_COLOR + ">>> Select [code block] to copy to the clipboard: " + "\033[0m")
+                selection = int(block_selection)
+                if 1 <= selection <= len(code_blocks):
+                    copy_to_clipboard(code_blocks[selection - 1])
+                    # print(f"Code block [{selection}] has been copied to the clipboard.")
+                    break
+                else:   # Do nothing
+                    break
+            except ValueError: # Do nothing
+                break
 
 if __name__ == "__main__":
     with contextlib.suppress(TypeError):
         main()
+

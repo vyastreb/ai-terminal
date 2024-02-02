@@ -1,9 +1,13 @@
 
 # TODO
 
-+ [ ] Make code in \`xxx\` and code in blocks \`\`\`xxx\`\`\` selectable.
++ [ ] As soon as the past history is implemented, the last question is not saved in "questions.txt" file. It should be saved.
 
 # Done
+
+February 2, 2024
+
+[x] Code blocks \`\`\`xxx\`\`\` are selectable to be copied to the clipboard.
 
 January 31, 2024
 
@@ -16,7 +20,7 @@ January 30, 2024
 January 19, 2024
 
 + [x] Add possibility to make a dialog by keeping recent messages in the memory. *Fixed on Jan 30, 2024.*
-+ [x] Script does not handle \#, \' and probably \" in the text of the question,  solve it. *FIXED on Jan 31, 2024"
++ [x] Script does not handle \#, \', \", etc in the text of the question, fixed on Jan 31, 2024.
 
 3. Syntaxis with \`xxx\` does not work well, see example:
 
