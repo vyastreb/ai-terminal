@@ -24,6 +24,7 @@ The configuration file `.mistralai/config.json` is used to store the parameters.
 from mistralai.client import MistralClient
 from mistralai.models.chat_completion import ChatMessage
 import os, sys, re, time, json, contextlib, readline, subprocess, threading, itertools
+import pathlib as pl 
 from collections import deque
 # Package for handling chat interface with history, multi-line input and prompting
 from prompt_toolkit import PromptSession
@@ -35,9 +36,10 @@ from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 #     Global parameters
 ########################################
 
-CONFIG_PATH     = os.path.expanduser("~/.mistralai/config.json")
-HISTORY_PATH    = os.path.expanduser("~/.mistralai/history.txt")
-QUESTIONS_PATH  = os.path.expanduser("~/.mistralai/questions.txt")
+USER_STORAGE_PATH = (pl.Path("~") / ".mistralai").expanduser()
+CONFIG_PATH     = USER_STORAGE_PATH / "config.json"
+HISTORY_PATH    = USER_STORAGE_PATH / "history.txt" 
+QUESTIONS_PATH  = USER_STORAGE_PATH / "questions.txt"
 QUESTION_HISTORY_LENGTH = 100
 
 # ANSI color codes
@@ -76,7 +78,7 @@ client = MistralClient(api_key=api_key)
 ########################################
 
 def load_history():
-    if os.path.exists(QUESTIONS_PATH):
+    if QUESTIONS_PATH.exists():
         readline.read_history_file(QUESTIONS_PATH)
 
 def save_history():
@@ -287,9 +289,9 @@ def main():
 
     # Checks whether config file exists: if yes, read parameters from there, otherwise use default values
     ArgumentsProvenance = "Default values"
-    if os.path.isfile(CONFIG_PATH):
+    if CONFIG_PATH.exists():
         try:
-            with open(CONFIG_PATH, 'r') as file:
+            with CONFIG_PATH.open("r") as file:
                 ArgumentsProvenance = "Configuration file"
                 config = json.load(file)
                 model = config["model"]
@@ -416,7 +418,7 @@ def main():
         answer = "ERROR: An error occurred, please try again"
     if Chat:
         chat_history.append(answer)
-        with open(os.path.expanduser("~/.mistralai/history.txt"), 'w') as f:
+        with HISTORY_PATH.open("w") as f:
             f.write('\n$$##\n'.join(chat_history))
     
     # Stopping the animation
@@ -444,7 +446,13 @@ def main():
         print(CODE_COLOR + "/ Code block [1] was copied to the clipboard. \033[0m")
         copy_to_clipboard(code_blocks[0])
 
-if __name__ == "__main__":
+
+def entry_point():
+    if not USER_STORAGE_PATH.exists():
+        USER_STORAGE_PATH.mkdir()
     with contextlib.suppress(TypeError):
         main()
 
+
+if __name__ == "__main__":
+    entry_point()
