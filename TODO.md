@@ -1,6 +1,8 @@
 
 # TODO
 
+[ ] Add extra "description" as in chatGPT to guide better chatbot, e.g. to not let it reply about windows if I use Linux.
+[ ] Add GPT API interface.
 [ ] Check **\#FIXME** about bold and italic text so that it is properly handled in code blocks.
 [ ] If the number of requested tokens is too short, and the answer is cut, we can internally handle it to ask to continue. For example, we can check that the answer does not end with a full stop... but it is not a general receipt, it can stop at \`\`\` without full stop.
 

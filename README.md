@@ -4,10 +4,17 @@
 
 MistralTerminal is a command-line interface for interacting with MistralAI. It allows users to send questions directly from the terminal and receive concise answers from MistralAI. This script is designed for simplicity and ease of use. It keeps the conversation history, so you can continue interact with it without giving the context every time. The input can be multiline. If the script suggest code blocks, you can easily copy them in the clipboard. It also supports colored output for enhanced readability.
 
+## License
+
+License: BSD 3 clause
+
 ## Author
 
 V.A. Yastrebov, CNRS, MINES Paris - PSL, France, Jan 2024.
-License: BSD 3 clause
+
+## External Contributors
+
+- [Basile Marchand](https://github.com/basileMarchand)
 
 ## Requirements
 
@@ -117,6 +124,3 @@ ai -m mistral-small -T 0.8 -t 500 -v
 - Ensure your terminal supports ANSI color codes for the best experience.
 - The history of last messages (31 by default) is stored in `~/.mistralai/history.txt` for 3 minutes by default. You can change the number of stored messages and the time in the script of in config file: `max_memory` and `waitingTime`.
 
-## External Contributors
-
-- [Basile Marchand](https://github.com/basileMarchand)

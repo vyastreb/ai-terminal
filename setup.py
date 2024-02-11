@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import pathlib as pl
@@ -6,7 +5,7 @@ from setuptools import setup, find_packages
 import ai_terminal as ait
 
 name = 'ai-terminal'
-contact = "xxx"
+contact = "vladislav.yastrebov@minesparis.psl.eu"
 version = ait.__version__
 
 here = pl.Path(__file__).parent.absolute()
