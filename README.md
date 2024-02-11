@@ -11,25 +11,34 @@ License: BSD 3 clause
 
 ## Requirements
 
-- Python 3
-- mistralai Python package `pip install mistralai`
-- prompt toolkit Python package ` prompt-toolkit`
 - An API key for MistralAI, check on [mistral.ai](https://mistral.ai)
 
 ## Installation
 
-Ensure Python 3 and the necessary packages are installed. Set your MistralAI API key in your environment:
+Set your MistralAI API key in your environment:
 
 ```bash
 export MISTRAL_API_KEY='your_api_key_here'
 ```
-You can also set-up an alias `ai` to run the script from anywhere in your terminal (for `bash` add in your `.bashrc`):
+
+### From Github sources
 
 ```bash
-alias ai="python3 /path/to/script/MistralTerminal.py"
+git clone https://github.com/vyastreb/ai-terminal.git
+cd ai-terminal
 ```
 
-### Options
+Install required dependencies and the `ai` command using :
+
+```bash
+pip install .
+```
+
+### From PyPi
+
+**Comming Soon**
+
+## Options
 
 - `--model/-m`: Sets the MistralAI model to be used (mistral-tiny, mistral-small or mistral-medium). Default is 'mistral-tiny'.
 - `--temp/-T`: Sets the temperature for the AI's responses. Default is 0.2.
@@ -39,16 +48,17 @@ alias ai="python3 /path/to/script/MistralTerminal.py"
 - `--unit-test/-u`: Unit tests.
 - `--help/-h`: Displays the help message and usage instructions.
 
-The default model is 'mistral-tiny', which is a smaller model that is faster to load and run. The default temperature is 0.5, which is a good value for most questions. The default token count is 350, which is a reasonable length for most answers. The verbose option is useful for checking whether your questions and history were correctly parsed by the script. 
+The default model is 'mistral-tiny', which is a smaller model that is faster to load and run. The default temperature is 0.5, which is a good value for most questions. The default token count is 350, which is a reasonable length for most answers. The verbose option is useful for checking whether your questions and history were correctly parsed by the script.
 
 ### Configuration file
 
-All parameters could be defined in the script or in the config file `~/.mistralai/config.json`. 
+All parameters could be defined in the script or in the config file `~/.mistralai/config.json`.
 If config file is not found, the script will use default parameters.
 If config file exists, it will use parameters from the file, and will ignore parameters defined in the script.
 But if you prescribe options in the command line, they will be used instead of the config file.
 
-*Example of config file:*
+_Example of config file:_
+
 ```
 {
  "model": "mistral-tiny",
@@ -58,19 +68,14 @@ But if you prescribe options in the command line, they will be used instead of t
  "max_line_length": 80,
  "temperature": 0.5
 }
-``` 
-
-### Usage
-
-The script can be run from the command line with various options. Enter your question preceded by `:` and the script will process and display the AI's response.
-
-```bash
-python3 MistralTerminal.py [options]
 ```
-or if you set-up an alias:
+
+## Usage
+
 ```bash
 ai [options]
 ```
+
 These commands will start a new line `>  ` where your question could be written.
 
 **Examples:**
@@ -111,3 +116,7 @@ ai -m mistral-small -T 0.8 -t 500 -v
 
 - Ensure your terminal supports ANSI color codes for the best experience.
 - The history of last messages (31 by default) is stored in `~/.mistralai/history.txt` for 3 minutes by default. You can change the number of stored messages and the time in the script of in config file: `max_memory` and `waitingTime`.
+
+## External Contributors
+
+- [Basile Marchand](https://github.com/basileMarchand)
