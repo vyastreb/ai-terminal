@@ -2,11 +2,10 @@
 
 import pathlib as pl
 from setuptools import setup, find_packages
-import ai_terminal as ait
 
 name = 'ai-terminal'
 contact = "vladislav.yastrebov@minesparis.psl.eu"
-version = ait.__version__
+version = "0.1.0"
 
 here = pl.Path(__file__).parent.absolute()
 
