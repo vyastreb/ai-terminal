@@ -150,7 +150,7 @@ def print_in_box(text, color_code):
 
     print(color_code + upper_border)
     for line in lines:
-        print('| ' + line + ' ' * (max_line_length - len(strip_ansi_codes(line))) + ' |')
+        print('  ' + line + ' ' * (max_line_length - len(strip_ansi_codes(line))) + '  ')
     print(lower_border + '\033[0m')  # Reset to default color at the end
 
 def split_long_lines(input_string, max_line_length):
@@ -285,7 +285,7 @@ def main():
     verbose = False
     max_memory = 31 # Maximum number of previous answers to keep in memory in chat mode, should be odd
     waitingTime = 180 # Time in seconds after which the history is erased
-    max_line_length = 80      
+    max_line_length = 60      
 
     # Checks whether config file exists: if yes, read parameters from there, otherwise use default values
     ArgumentsProvenance = "Default values"

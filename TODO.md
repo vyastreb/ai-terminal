@@ -1,6 +1,7 @@
 
 # TODO
 
+[ ] Pass the Q&A sessions to prompt_toolkit and add verification that the last sequence in history log starts with user question and ends with ai answer.
 [ ] Add extra "description" as in chatGPT to guide better chatbot, e.g. to not let it reply about windows if I use Linux.
 [ ] Add GPT API interface.
 [ ] Check **\#FIXME** about bold and italic text so that it is properly handled in code blocks.
