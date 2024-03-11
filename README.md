@@ -43,7 +43,9 @@ pip install .
 
 ### From PyPi
 
-**Comming Soon**
+```
+pip install ai-terminal
+```
 
 ## Options
 
@@ -123,4 +125,3 @@ ai -m mistral-small -T 0.8 -t 500 -v
 
 - Ensure your terminal supports ANSI color codes for the best experience.
 - The history of last messages (31 by default) is stored in `~/.mistralai/history.txt` for 3 minutes by default. You can change the number of stored messages and the time in the script of in config file: `max_memory` and `waitingTime`.
-
